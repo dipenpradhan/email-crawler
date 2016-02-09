@@ -4,6 +4,7 @@ Create a command line program that will take an internet domain name (i.e. “ja
 
 ##Example:
 
+
 ```
 > python find_email_addresses.py jana.com
 Found these email addresses:
@@ -12,6 +13,18 @@ press@jana.com
 info@jana.com
 ...
 ```
+
+```
+> python find_email_addresses.py mit.edu
+Found these email addresses:
+campus-map@mit.edu
+mitgrad@mit.edu
+sfs@mit.edu
+llwebmaster@ll.mit.edu
+webmaster@ll.mit.edu
+whatsonyourmind@mit.edu
+fac-officers@mit.edu
+...
 
 ##Guidelines:
 
