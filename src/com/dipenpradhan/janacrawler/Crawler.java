@@ -58,10 +58,6 @@ public class Crawler {
                 && urlsWriter != null
                 && emailsWriter != null) {
             crawl(startUrl);
-//            urlsWriter.flush();
-//            urlsWriter.close();
-//            emailsWriter.flush();
-//            emailsWriter.close();
         }
     }
 
@@ -101,12 +97,7 @@ public class Crawler {
                                 && !ignore
                                 ) {
 
-                            if (href.contains("mailto:")) {
-                                String email = href.replace("mailto:", "");
-//                                if (emailSet.add(email)) {
-//                                    emailsWriter.println(email);
-//                                }
-                            } else if (!urlSet.contains(href)) {
+                            if (!href.contains("mailto:") && !urlSet.contains(href)) {
                                 newUrlSet.add(href);
                             }
                         }
