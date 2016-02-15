@@ -4,6 +4,6 @@ Email crawler written in java
 
 Download .jar from https://github.com/dipenpradhan/email-crawler/releases
 
-Run the JAR file and enter the start URL as a parameter, as shown below:
+Run the JAR file and enter the start domain as a parameter, as shown below:
 
-```java -jar email_crawler.jar http://syr.edu```
+```java -jar email_crawler.jar syr.edu```

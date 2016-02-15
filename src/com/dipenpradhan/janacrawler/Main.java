@@ -8,15 +8,15 @@ public class Main {
     public static void main(String... args) {
 
         if(args.length>0) {
-            String url = args[0];
-            if(!url.contains("http://")){
-                System.err.println("Enter with http. Example: http://syr.edu");
+            String domain = args[0];
+            if(domain.contains("http://")){
+                System.err.println("DO NOT enter with http. Enter only the domain name Example: syr.edu");
             }else {
-                Crawler crawler = new Crawler(url);
+                Crawler crawler = new Crawler(domain);
                 crawler.beginCrawling();
             }
         }else{
-            System.err.println("Enter a website to begin crawling. Example: http://syr.edu");
+            System.err.println("Enter a domain to begin crawling. Example: syr.edu");
         }
     }
 

@@ -32,9 +32,9 @@ public class Crawler {
     private File urlsFile, emailsFile;
     private PrintWriter urlsWriter, emailsWriter;
 
-    public Crawler(String startUrl) {
-        this.startUrl = startUrl;
-        domain=startUrl.replace("http://","");
+    public Crawler(String domain) {
+        this.domain=domain;
+        this.startUrl = "http://"+domain;
         DateFormat dateFormatter = new SimpleDateFormat("YYYY_MM_dd_HH_mm_ss_SSS");
         String timeString = dateFormatter.format(new Date(System.currentTimeMillis()));
         urlsFile = new File("urls_" + timeString + ".txt");
