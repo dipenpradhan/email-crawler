@@ -35,7 +35,7 @@ public class Crawler {
     public Crawler(String domain) {
         this.domain=domain;
         this.startUrl = "http://"+domain;
-        DateFormat dateFormatter = new SimpleDateFormat("YYYY_MM_dd_HH_mm_ss_SSS");
+        DateFormat dateFormatter = new SimpleDateFormat("YYYY_MM_dd-HH_mm_ss_SSS");
         String timeString = dateFormatter.format(new Date(System.currentTimeMillis()));
         urlsFile = new File("urls_" + timeString + ".txt");
         emailsFile = new File("emails_" + timeString + ".txt");
