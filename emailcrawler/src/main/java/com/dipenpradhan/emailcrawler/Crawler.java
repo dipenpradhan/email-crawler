@@ -22,19 +22,36 @@ import java.util.regex.Pattern;
  */
 public class Crawler {
 
-    public static final String[] IGNORED_EXTENSIONS = new String[]{".pdf", ".jpg", ".bmp", ".png",
+    private static final String[] IGNORED_EXTENSIONS = new String[]{".pdf", ".jpg", ".bmp", ".png",
             ".doc", ".ppt", ".mov", ".3gp", ".mpg", ".mkv"};
+    private static final short THREAD_COUNT = 50;
+
     private String startUrl;
     private String domain;
     private Set<String> emailSet = new HashSet<>();
     private Set<String> urlSet = new HashSet<>();
-    private ExecutorService executor = Executors.newFixedThreadPool(50);
+    private ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT);
     private File urlsFile, emailsFile;
     private PrintWriter urlsWriter, emailsWriter;
+    private Pattern emailPattern = Pattern.compile("\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}\\b",
+            Pattern.CASE_INSENSITIVE);
 
+    /**
+     * Instantiates a new Crawler.
+     *
+     * @param domain the domain
+     */
     public Crawler(String domain) {
-        this.domain=domain;
-        this.startUrl = "http://"+domain;
+        this.domain = domain;
+        this.startUrl = "http://" + domain;
+        init();
+    }
+
+    /**
+     * Create files and initialize writers
+     **/
+    private void init() {
+
         DateFormat dateFormatter = new SimpleDateFormat("YYYY_MM_dd-HH_mm_ss_SSS");
         String timeString = dateFormatter.format(new Date(System.currentTimeMillis()));
         urlsFile = new File("urls_" + timeString + ".txt");
@@ -51,6 +68,9 @@ public class Crawler {
 
     }
 
+    /**
+     * Begin crawling the page based on start domain provided
+     */
     public void beginCrawling() {
 
         if (urlsFile != null
@@ -61,59 +81,111 @@ public class Crawler {
         }
     }
 
+    /**
+     * Crawl this URL
+     *
+     * @param url the url
+     */
     public void crawl(final String url) {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                urlsWriter.println(url);
 
-                urlSet.add(url);
-                Set<String> newUrlSet = new HashSet<>();
+                urlsWriter.println(url);
+                urlsWriter.flush();
+
+                urlSet.add(url); // Add it to main list of urls
 
                 try {
-                    Document doc = Jsoup.connect(url).get();
-                    Pattern p = Pattern.compile("\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}\\b",
-                            Pattern.CASE_INSENSITIVE);
-                    Matcher matcher = p.matcher(doc.body().toString());
-                    while(matcher.find()) {
-                        String email = matcher.group().replace("mailto:","");
-                        if (emailSet.add(email)) {
-                            emailsWriter.println(email);
-                            System.out.println(email);
-                        }
-                    }
+                    Document doc = Jsoup.connect(url).get();     // Fetch the webpage, and create a JSoup Document object using it
 
-                    for (Element ah : doc.select("a[href]")) {
-                        String href = ah.attr("abs:href");
-                        boolean ignore = false;
-                        for (String ext : IGNORED_EXTENSIONS) {
-                            if (href.contains(ext)) {
-                                ignore = true;
-                                break;
-                            }
-                        }
+                    findEmails(doc);        // Finds and processes new emails on this page
 
-                        if (href.contains(domain)
-                                && !ignore
-                                ) {
-
-                            if (!href.contains("mailto:") && !urlSet.contains(href)) {
-                                newUrlSet.add(href);
-                            }
-                        }
-
-                    }
+                    findNewUrls(doc);       // Finds new urls on this page and initiates crawling on them
                 } catch (Exception e) {
 //                    e.printStackTrace();
-                }
-                urlsWriter.flush();
-                emailsWriter.flush();
-                for (String u : newUrlSet) {
-                    crawl(u);
                 }
             }
 
         };
         executor.execute(runnable);
+    }
+
+
+    /**
+     * Find emails.
+     *
+     * @param doc the doc
+     */
+    private void findEmails(Document doc) {
+
+        Matcher matcher = emailPattern.matcher(doc.body().toString());
+
+        while (matcher.find()) {
+            String email = matcher.group();
+            if (emailSet.add(email)) {
+                processNewEmail(email);
+            }
+        }
+    }
+
+    /**
+     * Process new email.
+     *
+     * @param email the email
+     */
+    private void processNewEmail(String email) {
+        emailsWriter.println(email);
+        emailsWriter.flush();
+        System.out.println(email);
+    }
+
+    /**
+     * Find new urls set.
+     *
+     * @param doc the doc
+     * @return the set
+     */
+    private Set<String> findNewUrls(Document doc) {
+        Set<String> newUrlSet = new HashSet<>();
+
+        for (Element ah : doc.select("a[href]")) {
+            String href = ah.attr("abs:href");
+
+            if (!urlSet.contains(href)              // Check if this is a new URL
+                    && href.contains(domain)        // Check if the URL is from the same domain
+                    && isValidExtension(href)       // Check that the file extension is not in the list of excluded extensions
+                    && !href.contains("mailto:")    // Check that the href is not an email address
+                    ) {
+                newUrlSet.add(href);
+            }
+
+        }
+
+        processNewUrls(newUrlSet);
+        return newUrlSet;
+    }
+
+    /**
+     * Process new urls.
+     *
+     * @param newUrls the new urls
+     */
+    private void processNewUrls(Set<String> newUrls) {
+        for (String u : newUrls) {
+            crawl(u);
+        }
+    }
+
+    /**
+     * Is the file extension valid. (checks IGNORED_EXTENSIONS list)
+     */
+    private boolean isValidExtension(String url){
+        for (String ext : IGNORED_EXTENSIONS) {
+            if (url.contains(ext)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
