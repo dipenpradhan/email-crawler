@@ -1,4 +1,4 @@
-package com.dipenpradhan.janacrawler;
+package com.dipenpradhan.emailcrawler;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

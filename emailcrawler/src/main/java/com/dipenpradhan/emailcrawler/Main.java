@@ -1,4 +1,4 @@
-package com.dipenpradhan.janacrawler;
+package com.dipenpradhan.emailcrawler;
 
 /**
  * Created by dipenpradhan on 2/15/16.

@@ -6,12 +6,26 @@ task wrapper(type: Wrapper) {
   distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
 }
 
-apply plugin: 'java'
+apply plugin: 'application'
 
 sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+}
+mainClassName = "com.dipenpradhan.emailcrawler.Main"
+
+run{
+    if(System.getProperty("args") != null) {
+        args System.getProperty("args").split()
+    }
+
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.dipenpradhan.emailcrawler.Main'
+    }
 }
 
 dependencies {
